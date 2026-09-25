@@ -1,0 +1,36 @@
+workflows:
+  android-kotlin-build:
+    name: Android Kotlin APK Build
+    max_build_duration: 60
+    instance_type: linux_x2
+    environment:
+      # 1. Link the keystore you uploaded to your Personal Settings
+      android_signing:
+        - my_android_keystore 
+        
+      vars:
+        # 2. Add your Secrets Plugin (.env) variables here!
+        # The Google Secrets Plugin will automatically read these
+        # Example: API_KEY: "your_actual_api_key"
+        
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: 'main' # Change if your main branch is named differently (e.g., 'master')
+
+    scripts:
+      - name: Build Release APK
+        script: | 
+          chmod +x ./gradlew
+          ./gradlew assembleRelease
+
+    artifacts:
+      # Because your module is standard, this path is correct
+      - app/build/outputs/apk/release/app-release.apk
+      - app/build/outputs/apk/**/*.apk
+
+    publishing:
+      email:
+        recipients:
+          - your-email@example.com # Add your email to get the APK link
