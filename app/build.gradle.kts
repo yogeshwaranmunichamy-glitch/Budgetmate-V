@@ -22,13 +22,25 @@ android {
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
   }
 
-  signingConfigs {
+    signingConfigs {
     create("release") {
-      val keystorePath = System.getenv("KEYSTORE_PATH") ?: "${rootDir}/my-upload-key.jks"
-      storeFile = file(keystorePath)
-      storePassword = System.getenv("STORE_PASSWORD")
-      keyAlias = "upload"
-      keyPassword = System.getenv("KEY_PASSWORD")
+      // Check if Codemagic environment variables are present
+      val codemagicKeystorePath = System.getenv("CM_KEYSTORE_PATH")
+      
+      if (codemagicKeystorePath != null) {
+        // --- RUNNING ON CODEMAGIC ---
+        storeFile = file(codemagicKeystorePath)
+        storePassword = System.getenv("CM_KEYSTORE_PASSWORD")
+        keyAlias = System.getenv("CM_KEY_ALIAS") // Fixes the hardcoded "upload" issue!
+        keyPassword = System.getenv("CM_KEY_PASSWORD")
+      } else {
+        // --- LOCAL DEVELOPMENT FALLBACK ---
+        // Update these with your actual local passwords if you build locally
+        storeFile = file("${rootDir}/my-upload-key.jks")
+        storePassword = "YOUR_LOCAL_STORE_PASSWORD"
+        keyAlias = "upload"
+        keyPassword = "YOUR_LOCAL_KEY_PASSWORD"
+      }
     }
     create("debugConfig") {
       storeFile = file("${rootDir}/debug.keystore")
